@@ -16,7 +16,7 @@
                 <div class="alert alert-success">{{ session('success') }}</div>
             @endif
 
-            <form action="{{ route('barang.cetak') }}" method="POST" target="_blank">
+            <form action="{{ route('barang.cetak') }}" method="POST" target="_blank" id="form-cetak">
                 @csrf
                 <div class="row mb-4 p-3 bg-light rounded border">
                     <div class="col-md-12 mb-2">
@@ -88,10 +88,31 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('#tabel-barang').DataTable({"language": {"url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"}, "ordering": false});
         
-        $('#checkAll').click(function () {
-            $('.checkItem').prop('checked', this.checked);
+        var table = $('#tabel-barang').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json"
+            }, 
+            "ordering": false
+        });
+        
+        $(document).on('change', '#checkAll', function() {
+            var statusCentang = $(this).prop('checked');
+            
+            $('.checkItem').prop('checked', statusCentang);
+            
+            table.$('.checkItem').prop('checked', statusCentang);
+        });
+
+        $('#form-cetak').on('submit', function(e) {
+            var form = this;
+            table.$('.checkItem:checked').each(function(){
+                if(!$.contains(document, this)){
+                    $(form).append(
+                        $('<input>').attr('type', 'hidden').attr('name', this.name).val(this.value)
+                    );
+                }
+            });
         });
     });
 </script>
