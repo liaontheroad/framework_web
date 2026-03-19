@@ -70,7 +70,26 @@
           </ul>
         </div>
       </li>
-
+      <li class="nav-item {{ Request::is('modul-ajax*') ? 'active' : '' }}">
+        <a class="nav-link" data-bs-toggle="collapse" href="#modul-ajax" aria-expanded="{{ Request::is('modul-ajax*') ? 'true' : 'false' }}" aria-controls="modul-ajax">
+          <span class="menu-title">Modul AJAX & Axios</span>
+          <i class="menu-arrow"></i>
+          <i class="mdi mdi- satellite-variant menu-icon"></i> 
+        </a>
+        <div class="collapse {{ Request::is('modul-ajax*') ? 'show' : '' }}" id="modul-ajax">
+          <ul class="nav flex-column sub-menu">
+            <li class="nav-item"> 
+              <a class="nav-link {{ Request::routeIs('wilayah.index') ? 'active' : '' }}" href="{{ route('wilayah.index') }}">Manajemen Wilayah (Ajax)</a>
+            </li>
+            <li class="nav-item"> 
+              <a class="nav-link {{ Request::routeIs('wilayah.axios') ? 'active' : '' }}" href="{{ route('wilayah.axios') }}">Manajemen Wilayah (Axios)</a>
+            </li>
+            <li class="nav-item"> 
+              <a class="nav-link {{ Request::routeIs('kasir.index') ? 'active' : '' }}" href="{{ route('kasir.index') }}">Aplikasi Kasir</a>
+            </li>
+          </ul>
+        </div>
+      </li>
       <li class="nav-item">
         <a class="nav-link" data-bs-toggle="collapse" href="#cetak-pdf-admin" aria-expanded="false" aria-controls="cetak-pdf-admin">
           <span class="menu-title">Cetak Laporan PDF</span>

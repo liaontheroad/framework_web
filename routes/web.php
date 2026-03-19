@@ -9,6 +9,8 @@ use App\Http\Controllers\VisitorController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\StudyCaseController;
+use App\Http\Controllers\WilayahController;
+use App\Http\Controllers\KasirController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -64,4 +66,26 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/modul-4/tabel-biasa', [StudyCaseController::class, 'tabelBiasa'])->name('modul4.biasa');
     Route::get('/modul-4/tabel-datatables', [StudyCaseController::class, 'tabelDataTables'])->name('modul4.datatables');
     Route::get('/modul-4/select2-kota', [StudyCaseController::class, 'select2Kota'])->name('modul4.select2');
+});
+
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':admin'])->group(function () {
+
+    Route::get('/wilayah', [WilayahController::class, 'wilayah'])->name('wilayah.index');
+    Route::post('/get-kota', [WilayahController::class, 'getKota'])->name('admin.wilayah.getKota');
+    Route::post('/get-kecamatan', [WilayahController::class, 'getKecamatan'])->name('admin.wilayah.getKecamatan');
+    Route::post('/get-kelurahan', [WilayahController::class, 'getKelurahan'])->name('admin.wilayah.getKelurahan');
+
+    Route::get('/wilayah-axios', [WilayahController::class, 'index'])->name('wilayah.axios');
+    Route::post('/axios-get-kota', [WilayahController::class, 'axiosGetKota'])->name('api.getKota');
+    Route::post('/axios-get-kecamatan', [WilayahController::class, 'axiosGetKecamatan'])->name('api.getKecamatan');
+    Route::post('/axios-get-kelurahan', [WilayahController::class, 'axiosGetKelurahan'])->name('api.getKelurahan');
+
+    // Menu Kasir
+    Route::get('/modul-ajax/kasir', [KasirController::class, 'index'])->name('kasir.index');
+    Route::get('/get-barang/{kode}', [KasirController::class, 'getBarang']);
+    Route::post('/simpan-transaksi', [KasirController::class, 'store']);
+
+    Route::get('/kasir-axios', [KasirAxiosController::class, 'index']);
+    Route::get('/get-barang/{kode}', [KasirAxiosController::class, 'getBarangAxios']);
+    Route::post('/simpan-transaksi', [KasirAxiosController::class, 'storeAxios']);
 });
