@@ -152,5 +152,23 @@
       </li>
 
     @endif
+
+    @if(Auth::user()->role?->name == 'pemilik_vendor')
+
+    <li class="nav-item {{ Request::is('vendor/menu*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('vendor.menu') }}">
+            <span class="menu-title">Kelola Menu</span>
+            <i class="mdi mdi-food menu-icon"></i>
+        </a>
+    </li>
+
+    <li class="nav-item {{ Request::is('vendor/pesanan*') ? 'active' : '' }}">
+        <a class="nav-link" href="{{ route('vendor.pesanan') }}">
+            <span class="menu-title">Pesanan Masuk</span>
+            <i class="mdi mdi-receipt menu-icon"></i>
+        </a>
+    </li>
+
+@endif
   </ul>
 </nav>

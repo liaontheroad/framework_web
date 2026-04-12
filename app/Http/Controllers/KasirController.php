@@ -7,71 +7,61 @@ use Illuminate\Support\Facades\DB;
 
 class KasirController extends Controller
 {
-
     public function index() {
         return view('modul_ajax.kasir'); 
     }
 
-    public function kasirAxios() {
-        return view('modul_ajax.kasir-axios');
-    }
-
+    // 1. Fungsi Ambil Barang (Sesuai kolom: id, nama, harga)
     public function getBarang($kode) {
         $barang = DB::table('produk')
-                    ->where('kode_produk', $kode) 
+                    ->where('id', (int)$kode) 
                     ->first();
 
         if($barang) {
-            return response()->json($barang);
+            return response()->json([
+                'id'    => $barang->id,   // Ini kodenya (1, 2, atau 3)
+                'nama'  => $barang->nama, // Sesuai kolom di SQL baru
+                'harga' => $barang->harga
+            ]);
         }
 
         return response()->json(['message' => 'Barang Tidak Ditemukan'], 404);
     }
 
+    // 2. Fungsi Simpan Transaksi (Sesuai ERD: penjualan & penjualan_detail)
     public function store(Request $request) {
         if (!$request->has('items') || count($request->items) == 0) {
-            return response()->json(['message' => 'Keranjang masih kosong!'], 400);
+            return response()->json(['status' => 'error', 'message' => 'Keranjang kosong!'], 400);
         }
 
         DB::beginTransaction();
         try {
+            // INSERT KE TABEL: penjualan (Header)
+            // Kolom sesuai ERD: id_penjualan, timestamp, total
             $penjualanId = DB::table('penjualan')->insertGetId([
-                'nomor_faktur' => 'TRX-' . strtoupper(uniqid()),
-                'user_id' => 1, 
-                'total_harga' => $request->total,
-                'bayar' => $request->total,
-                'kembali' => 0,
-                'tanggal_transaksi' => now()
-            ]);
+                'total'     => $request->total,
+                'timestamp' => now()
+            ], 'id_penjualan'); // Menyatakan PK-nya adalah id_penjualan
 
             foreach ($request->items as $item) {
-                $produk = DB::table('produk')->where('id', $item['id'])->first();
-
-                if (!$produk) {
-                    throw new \Exception("Produk ID {$item['id']} tidak ditemukan!");
-                }
-
-                if ($produk->stok < $item['jumlah']) {
-                    throw new \Exception("Stok {$produk->nama_produk} tidak mencukupi!");
-                }
-                DB::table('detail_penjualan')->insert([
-                    'penjualan_id' => $penjualanId,
-                    'produk_id'    => $item['id'],
+                // INSERT KE TABEL: penjualan_detail
+                // Kolom sesuai ERD: id_penjualan, id_produk, jumlah, subtotal
+                DB::table('penjualan_detail')->insert([
+                    'id_penjualan' => $penjualanId,
+                    'id_produk'    => $item['id'], // ID dari tabel produk
                     'jumlah'       => $item['jumlah'],
-                    'harga_satuan' => $item['harga'],
                     'subtotal'     => $item['subtotal']
                 ]);
-                DB::table('produk')
-                    ->where('id', $item['id'])
-                    ->decrement('stok', $item['jumlah']);
+
+                // Opsional: Jika ada kolom stok di tabel produk, potong stoknya
+                // DB::table('produk')->where('id', $item['id'])->decrement('stok', $item['jumlah']);
             }
 
             DB::commit();
             
             return response()->json([
                 'status' => 'success',
-                'message' => 'Transaksi Berhasil Disimpan!',
-                'faktur' => 'TRX-' . time()
+                'message' => 'Pembayaran transaksi berhasil disimpan'
             ]);
 
         } catch (\Exception $e) {

@@ -97,7 +97,38 @@
 
     let keranjang = [];
 
-    function cekBarang() {
+   function cekBarang() {
+    let kode = $('#kode_barang').val();
+    if (!kode) return;
+
+    let btn = $('#btnCek');
+    btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
+
+    axios.get('/get-barang/' + kode)
+        .then(res => {
+            // Isi data ke input
+            $('#id_produk').val(res.data.id); 
+            $('#nama_barang').val(res.data.nama_produk); 
+            $('#harga_barang').val(res.data.harga);      
+            
+            // --- DI SINI TEMPATNYA ---
+            // Barang ditemukan, maka aktifkan tombol tambah (Ketentuan d)
+            $('#btnTambah').prop('disabled', false);
+
+            $('#formCari .form-control').addClass('animate__animated animate__pulse');
+            $('#jumlah_beli').focus().select();
+        })
+        .catch(err => {
+            // --- DI SINI JUGA ---
+            // Jika error (tidak ditemukan), pastikan tombol tambah tetap mati
+            $('#btnTambah').prop('disabled', true);
+            
+            Swal.fire('Oops!', 'Kode barang tidak terdaftar!', 'error');
+        })
+        .finally(() => {
+            btn.prop('disabled', false).html('Cek');
+        });
+}
         let kode = $('#kode_barang').val();
         if (!kode) return;
 
@@ -106,30 +137,17 @@
 
         axios.get('/get-barang/' + kode)
             .then(res => {
-                $('#id_produk').val(res.data.id);
-                $('#nama_barang').val(res.data.nama_produk);
-                $('#harga_barang').val(res.data.harga_jual);
-                $('#formCari .form-control').addClass('animate__animated animate__pulse');
-
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Barang ditemukan!',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-
-                $('#jumlah_beli').focus().select();
+                // DISESUAIKAN DENGAN NAMA KOLOM SQL BARU
+                $('#id_produk').val(res.data.id); 
+                $('#nama_barang').val(res.data.nama_produk); // Kolom db: nama_produk
+                $('#harga_barang').val(res.data.harga);      // Kolom db: harga
                 
-                setTimeout(() => {
-                    $('#formCari .form-control').removeClass('animate__animated animate__pulse');
-                }, 1000);
+                $('#formCari .form-control').addClass('animate__animated animate__pulse');
+                // ... (rest of toast)
+                $('#jumlah_beli').focus().select();
             })
             .catch(err => {
-                $('#kode_barang').addClass('animate__animated animate__shakeX');
-                Swal.fire('Oops!', 'Kode barang tidak terdaftar!', 'error');
-                setTimeout(() => $('#kode_barang').removeClass('animate__animated animate__shakeX'), 1000);
+                // ... (error handling)
             })
             .finally(() => {
                 btn.prop('disabled', false).html('Cek');
@@ -158,6 +176,7 @@
 
         renderKeranjang();
         $('#formCari')[0].reset();
+        $('#btnTambah').prop('disabled', true); 
         $('#kode_barang').focus();
     }
 

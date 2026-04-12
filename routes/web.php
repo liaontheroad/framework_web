@@ -11,13 +11,25 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\StudyCaseController;
 use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\KasirController;
+use App\Http\Controllers\KantinController;
+use App\Http\Controllers\AuthController;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+// --- RUTE CUSTOMER (GUEST) ---
+Route::get('/', [KantinController::class, 'index'])->name('cashier.index');
+Route::get('/get-menu-vendor/{vendor_id}', [KantinController::class, 'getMenu']);
+Route::post('/simpan-pesanan', [KantinController::class, 'simpanPesanan'])->name('cashier.store');
+Route::post('/konfirmasi-bayar/{id}', [KantinController::class, 'konfirmasiBayar']);
 
 Auth::routes();
 
+Route::middleware(['auth'])->group(function () {
+    // --- RUTE KHUSUS VENDOR ---
+    Route::middleware([\App\Http\Middleware\CheckRole::class.':pemilik_vendor'])->group(function () {
+        Route::get('/vendor/menu', [KantinController::class, 'manageMenu'])->name('vendor.menu');
+        Route::post('/vendor/menu/store', [KantinController::class, 'storeMenu']);
+        Route::get('/vendor/pesanan', [KantinController::class, 'pesananMasuk'])->name('vendor.pesanan');
+    });
+});
 // 1. SHARED ROUTES (Dashboard)
 Route::middleware(['auth'])->group(function () {
     // Rute untuk Verifikasi OTP
