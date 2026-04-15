@@ -20,19 +20,25 @@ class BarangController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'nama' => 'required|max:50',
-            'harga' => 'required|numeric'
-        ]);
+{
+    $request->validate([
+        'nama'  => 'required|max:50',
+        'harga' => 'required|numeric'
+    ]);
 
-        DB::table('barang')->insert([
-            'nama' => $request->nama,
-            'harga' => $request->harga
-        ]);
+    $id = DB::table('barang')->insertGetId([
+        'nama'  => $request->nama,
+        'harga' => $request->harga
+    ]);
 
-        return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan!');
-    }
+    // Generate kode dari tanggal + id
+    $kode = 'BRG-' . date('Ymd') . '-' . $id;
+    DB::table('barang')->where('id_barang', $id)->update([
+        'kode_barang' => $kode
+    ]);
+
+    return redirect()->route('barang.index')->with('success', 'Barang berhasil ditambahkan!');
+}
 
     public function edit($id)
     {
@@ -84,7 +90,20 @@ class BarangController extends Controller
             $dataCetak[] = $b;
         }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.pdf', compact('dataCetak'))->setPaper('a4', 'portrait');
-        return $pdf->stream('Tag_Harga_TnJ_108.pdf');
+        $generator = new \Picqer\Barcode\BarcodeGeneratorSVG();
+            foreach ($dataCetak as &$item) {
+                if ($item !== null) {
+                    $svg = $generator->getBarcode(
+                        (string)$item->kode_barang,
+                        $generator::TYPE_CODE_128
+                    );
+                    $item->barcode_base64 = 'data:image/svg+xml;base64,' . base64_encode($svg);
+                }
+            }
+            unset($item);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('barang.pdf', compact('dataCetak'))
+                ->setPaper('a4', 'portrait');
+        return $pdf->stream('Tag_Harga.pdf');
     }
 }

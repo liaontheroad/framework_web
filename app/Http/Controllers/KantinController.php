@@ -131,16 +131,31 @@ public function simpanPesanan(Request $request) {
 }
 
     public function konfirmasiBayar($id) {
-    // Cari pembelian berdasarkan ID
-    $pembelian = DB::table('pembelian')->where('id', $id)->first();
-    
-    if ($pembelian) {
-        DB::table('pembelian')->where('id', $id)->update([
-            'status_bayar' => 'Lunas'
-        ]);
-        return response()->json(['status' => 'success']);
+        $pembelian = DB::table('pembelian')->where('id', $id)->first();
+        
+        if ($pembelian) {
+            DB::table('pembelian')->where('id', $id)->update([
+                'status_bayar' => 'Lunas'
+            ]);
+
+            // Generate QR Code pakai SVG (tidak butuh GD)
+            $builder = new \Endroid\QrCode\Builder\Builder(
+                writer: new \Endroid\QrCode\Writer\SvgWriter(),
+                data: $pembelian->nomor_faktur,
+                size: 200,
+                margin: 10,
+            );
+            $result   = $builder->build();
+            // Encode SVG sebagai base64
+            $qrBase64 = 'data:image/svg+xml;base64,' . base64_encode($result->getString());
+
+            return response()->json([
+                'status'       => 'success',
+                'nomor_faktur' => $pembelian->nomor_faktur,
+                'qr_code'      => $qrBase64
+            ]);
+        }
+        
+        return response()->json(['status' => 'error'], 404);
     }
-    
-    return response()->json(['status' => 'error'], 404);
-}
 }

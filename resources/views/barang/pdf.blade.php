@@ -37,25 +37,57 @@
         }
 
         td {
-            
             width: 37.9mm; 
-            height: 18mm;
-            
+            height: 20mm;
             text-align: center;
             vertical-align: middle;
-            padding: 0;
+            padding: 1px;
             overflow: hidden;
-            
             border: 1px solid #ddd; 
             box-sizing: border-box;
         }
 
-        .nama { font-weight: bold; font-size: 6px; margin-bottom: 2px; display: block; white-space: nowrap; overflow: hidden; }
-        .harga { font-size: 9px; font-weight: bold; margin-bottom: 2px; }
-        .id { font-size: 4px; color: #555; }
+        .tag-box {
+            width: 100%;
+            text-align: center;
+        }
+
+        .nama { 
+            font-weight: bold; 
+            font-size: 5.5px; 
+            margin-bottom: 1px; 
+            display: block; 
+            white-space: nowrap; 
+            overflow: hidden; 
+        }
+
+        .harga { 
+            font-size: 7px; 
+            font-weight: bold; 
+            margin-bottom: 1px;
+            display: block;
+        }
+
+        .barcode {
+            width: 30mm;
+            height: 6mm;
+            display: block;
+            margin: 0 auto 1px auto;
+        }
+
+        .id { 
+            font-size: 8px; 
+            color: #000000;
+            display: block;
+        }
 
         .page-break {
             page-break-after: always;
+        }
+        .barcode-wrap svg {
+            width: 100% !important;
+            height: 8mm !important;
+            display: block;
         }
     </style>
 </head>
@@ -74,15 +106,8 @@
                             @if($item != null)
                                 <td>
                                     <div class="tag-box">
-                                        <div class="nama">
-                                            {{ \Illuminate\Support\Str::limit($item->nama, 20) }}
-                                        </div>
-                                        <div class="harga">
-                                            Rp {{ number_format($item->harga, 0, ',', '.') }}
-                                        </div>
-                                        <div class="id">
-                                            {{ $item->id_barang }}
-                                        </div>
+                                        <img src="{{ $item->barcode_base64 }}" class="barcode">
+                                        <div class="id">{{ $item->kode_barang }}</div>
                                     </div>
                                 </td>
                             @else

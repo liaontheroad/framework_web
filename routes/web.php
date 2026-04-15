@@ -13,6 +13,8 @@ use App\Http\Controllers\WilayahController;
 use App\Http\Controllers\KasirController;
 use App\Http\Controllers\KantinController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CustomerController;
+
 
 // --- RUTE CUSTOMER (GUEST) ---
 Route::get('/', [KantinController::class, 'index'])->name('cashier.index');
@@ -98,4 +100,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':admin'])->gro
     Route::get('/get-barang/{kode}', [KasirController::class, 'getBarang'])->name('kasir.getBarang');
     Route::post('/simpan-transaksi', [KasirController::class, 'store'])->name('kasir.store');
 
+});
+
+Route::middleware(['auth', \App\Http\Middleware\CheckRole::class.':admin'])->group(function () {
+    Route::get('/customer', [CustomerController::class, 'index'])->name('customer.index');
+    Route::get('/customer/tambah1', [CustomerController::class, 'tambah1'])->name('customer.tambah1');
+    Route::post('/customer/store1', [CustomerController::class, 'store1'])->name('customer.store1');
+    Route::get('/customer/tambah2', [CustomerController::class, 'tambah2'])->name('customer.tambah2');
+    Route::post('/customer/store2', [CustomerController::class, 'store2'])->name('customer.store2');
 });

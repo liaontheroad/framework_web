@@ -110,7 +110,30 @@
           </ul>
         </div>
       </li>
-
+    <li class="nav-item {{ Request::is('customer*') ? 'active' : '' }}">
+        <a class="nav-link" data-bs-toggle="collapse" href="#menu-customer" 
+          aria-expanded="{{ Request::is('customer*') ? 'true' : 'false' }}">
+            <span class="menu-title">Customer</span>
+            <i class="menu-arrow"></i>
+            <i class="mdi mdi-account-group menu-icon"></i>
+        </a>
+        <div class="collapse {{ Request::is('customer*') ? 'show' : '' }}" id="menu-customer">
+            <ul class="nav flex-column sub-menu">
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('customer') ? 'active' : '' }}" 
+                      href="{{ route('customer.index') }}">Data Customer</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('customer/tambah1') ? 'active' : '' }}" 
+                      href="{{ route('customer.tambah1') }}">Tambah Customer 1</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ Request::is('customer/tambah2') ? 'active' : '' }}" 
+                      href="{{ route('customer.tambah2') }}">Tambah Customer 2</a>
+                </li>
+            </ul>
+        </div>
+    </li>
     @endif
 
     @if(Auth::user()->role?->name == 'visitor')

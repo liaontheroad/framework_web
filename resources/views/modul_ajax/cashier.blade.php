@@ -184,11 +184,20 @@ function checkout() {
     })
     .then(res => {
         window.snap.pay(res.data.snap_token, {
-            onSuccess: function(result) {
+           onSuccess: function(result) {
                 axios.post('/konfirmasi-bayar/' + res.data.order_id)
-                .then(() => {
-                    Swal.fire('Pembayaran Berhasil!', 'Pesanan kamu sudah lunas.', 'success')
-                        .then(() => location.reload());
+                .then(response => {
+                    Swal.fire({
+                        title: 'Pembayaran Berhasil!',
+                        html: `
+                            <p>No. Pesanan: <strong>${response.data.nomor_faktur}</strong></p>
+                            <p>Tunjukkan QR Code ini ke kasir:</p>
+                            <img src="${response.data.qr_code}" 
+                                style="width:200px; height:200px; display:block; margin:0 auto;">
+                        `,
+                        icon: 'success',
+                        confirmButtonText: 'Selesai'
+                    }).then(() => location.reload());
                 });
             },
             onPending: function(result) {
