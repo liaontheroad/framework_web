@@ -82,6 +82,58 @@
 <script>
 let cart = [];
 
+// On page load, check localStorage for saved QR
+$(document).ready(function() {
+    let saved = localStorage.getItem('last_qr');
+    if (saved) {
+        let data = JSON.parse(saved);
+        $('div.card-body').prepend(`
+            <div class="alert alert-info d-flex justify-content-between align-items-center mb-3">
+                <span>
+                    <i class="mdi mdi-qrcode"></i>
+                    Anda memiliki pesanan aktif: <strong>${data.nomor_faktur}</strong>
+                </span>
+                <div>
+                    <button class="btn btn-info btn-sm mr-2" onclick="lihatQR()">
+                        <i class="mdi mdi-qrcode-scan"></i> Lihat QR Saya
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="hapusQR()">
+                        Hapus
+                    </button>
+                </div>
+            </div>
+        `);
+    }
+});
+
+function showQR(nomor_faktur, qr_code) {
+    Swal.fire({
+        title: 'Pembayaran Berhasil!',
+        html: `
+            <p>No. Pesanan: <strong>${nomor_faktur}</strong></p>
+            <p>Tunjukkan QR Code ini ke kasir:</p>
+            <img src="${qr_code}"
+                style="width:200px; height:200px; display:block; margin:0 auto;">
+            <br>
+            <small class="text-muted">QR Code tersimpan. Klik "Lihat QR Saya" jika perlu melihat lagi.</small>
+        `,
+        icon: 'success',
+        confirmButtonText: 'Selesai'
+    }).then(() => {
+        location.reload();
+    });
+}
+
+function lihatQR() {
+    let data = JSON.parse(localStorage.getItem('last_qr'));
+    showQR(data.nomor_faktur, data.qr_code);
+}
+
+function hapusQR() {
+    localStorage.removeItem('last_qr');
+    location.reload();
+}
+
 function updateMenu() {
     let vId = $('#vendor_id').val();
     if(!vId) return $('#menu_id').html('<option value="">-- Choose Menu --</option>');
@@ -184,20 +236,16 @@ function checkout() {
     })
     .then(res => {
         window.snap.pay(res.data.snap_token, {
-           onSuccess: function(result) {
+            onSuccess: function(result) {
                 axios.post('/konfirmasi-bayar/' + res.data.order_id)
                 .then(response => {
-                    Swal.fire({
-                        title: 'Pembayaran Berhasil!',
-                        html: `
-                            <p>No. Pesanan: <strong>${response.data.nomor_faktur}</strong></p>
-                            <p>Tunjukkan QR Code ini ke kasir:</p>
-                            <img src="${response.data.qr_code}" 
-                                style="width:200px; height:200px; display:block; margin:0 auto;">
-                        `,
-                        icon: 'success',
-                        confirmButtonText: 'Selesai'
-                    }).then(() => location.reload());
+                    // Save QR to localStorage so customer can access it after reload
+                    localStorage.setItem('last_qr', JSON.stringify({
+                        nomor_faktur: response.data.nomor_faktur,
+                        qr_code: response.data.qr_code
+                    }));
+
+                    showQR(response.data.nomor_faktur, response.data.qr_code);
                 });
             },
             onPending: function(result) {

@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class KantinController extends Controller
@@ -158,4 +159,47 @@ public function simpanPesanan(Request $request) {
         
         return response()->json(['status' => 'error'], 404);
     }
+
+    // Shows the scanner page
+public function scanQrPage()
+{
+    return view('vendor.scan_qr');
+}
+
+// API endpoint called by the scanner JS
+public function scanQr($nomor_faktur)
+{
+    $pembelian = DB::table('pembelian')
+        ->where('nomor_faktur', $nomor_faktur)
+        ->first();
+
+    if (!$pembelian) {
+        return response()->json(['message' => 'Pesanan tidak ditemukan.'], 404);
+    }
+
+    $items = DB::table('detail_pembelian')
+        ->join('makanan', 'detail_pembelian.makanan_id', '=', 'makanan.id')
+        ->where('detail_pembelian.pembelian_id', $pembelian->id)
+        ->select(
+            'makanan.nama_makanan',
+            'detail_pembelian.jumlah',
+            'detail_pembelian.subtotal'
+        )
+        ->get();
+
+    if ($items->isEmpty()) {
+        return response()->json(['message' => 'Tidak ada menu.'], 404);
+    }
+
+    return response()->json([
+        'nomor_faktur'  => $pembelian->nomor_faktur,
+        'nama_customer' => $pembelian->nama_customer,
+        'status_bayar'  => $pembelian->status_bayar,
+        'items'         => $items->map(fn($i) => [
+            'nama_makanan' => $i->nama_makanan,
+            'jumlah'       => $i->jumlah,
+            'subtotal'     => $i->subtotal,
+        ])
+    ]);
+}
 }

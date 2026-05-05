@@ -27,10 +27,12 @@ Auth::routes();
 Route::middleware(['auth'])->group(function () {
     // --- RUTE KHUSUS VENDOR ---
     Route::middleware([\App\Http\Middleware\CheckRole::class.':pemilik_vendor'])->group(function () {
-        Route::get('/vendor/menu', [KantinController::class, 'manageMenu'])->name('vendor.menu');
-        Route::post('/vendor/menu/store', [KantinController::class, 'storeMenu']);
-        Route::get('/vendor/pesanan', [KantinController::class, 'pesananMasuk'])->name('vendor.pesanan');
-    });
+    Route::get('/vendor/menu', [KantinController::class, 'manageMenu'])->name('vendor.menu');
+    Route::post('/vendor/menu/store', [KantinController::class, 'storeMenu']);
+    Route::get('/vendor/pesanan', [KantinController::class, 'pesananMasuk'])->name('vendor.pesanan');
+    Route::get('/vendor/scan-qr', [KantinController::class, 'scanQrPage'])->name('vendor.scan');
+    Route::get('/vendor/pesanan/scan/{nomor_faktur}', [KantinController::class, 'scanQr'])->name('vendor.scan.result');
+});
 });
 // 1. SHARED ROUTES (Dashboard)
 Route::middleware(['auth'])->group(function () {
