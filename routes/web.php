@@ -14,6 +14,7 @@ use App\Http\Controllers\KasirController;
 use App\Http\Controllers\KantinController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\TokoController;
 
 
 // --- RUTE CUSTOMER (GUEST) ---
@@ -33,6 +34,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vendor/scan-qr', [KantinController::class, 'scanQrPage'])->name('vendor.scan');
     Route::get('/vendor/pesanan/scan/{nomor_faktur}', [KantinController::class, 'scanQr'])->name('vendor.scan.result');
 });
+
+Route::get('/kunjungan-toko', [TokoController::class, 'index'])->name('toko.index');
+Route::get('/kunjungan-toko/tambah-toko', [TokoController::class, 'tambahTokoPage'])->name('toko.tambah');
+Route::post('/toko/store', [TokoController::class, 'store'])->name('toko.store');
+Route::get('/kunjungan-toko/kunjungi', [TokoController::class, 'kunjungiPage'])->name('toko.kunjungi.page');
+Route::get('/toko/barcode/{barcode}', [TokoController::class, 'getByBarcode'])->name('toko.barcode');
+Route::post('/toko/kunjungi', [TokoController::class, 'kunjungi'])->name('toko.kunjungi');
+
 });
 // 1. SHARED ROUTES (Dashboard)
 Route::middleware(['auth'])->group(function () {

@@ -134,6 +134,13 @@
             </ul>
         </div>
     </li>
+
+    <li class="nav-item {{ Request::is('kunjungan-toko') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('toko.index') }}">
+        <span class="menu-title">Kunjungan Toko</span>
+        <i class="mdi mdi-map-marker-radius menu-icon"></i>
+    </a>
+</li>
     @endif
 
     @if(Auth::user()->role?->name == 'visitor')
